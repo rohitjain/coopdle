@@ -1,52 +1,47 @@
 import { useMemo, useState } from 'react'
 import { generateCrimeBoard } from './generate'
+import { Item } from './Item'
+import { Silhouette } from './Silhouette'
 import type { SolverViewProps } from '../types'
 
 export function SolverView({ seed, onResult }: SolverViewProps) {
   const state = useMemo(() => generateCrimeBoard(seed), [seed])
-  const [selected, setSelected] = useState<Set<number>>(new Set())
-  const [result, setResult] = useState<'pending' | 'correct' | 'incorrect'>('pending')
+  const [selected, setSelected] = useState<string | null>(null)
+  const [result, setResult] = useState<'pending' | 'correct' | 'incorrect'>(
+    'pending',
+  )
 
-  function toggle(i: number) {
+  function pickSuspect(code: string) {
     if (result === 'correct') return
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(i)) next.delete(i)
-      else if (next.size < 3) next.add(i)
-      return next
-    })
+    setSelected(selected === code ? null : code)
     if (result === 'incorrect') setResult('pending')
   }
 
   function submit() {
-    const correct = new Set(state.correctIds)
-    const ok =
-      correct.size === selected.size && [...selected].every((i) => correct.has(i))
+    if (!selected) return
+    const ok = selected === state.liarCode
     setResult(ok ? 'correct' : 'incorrect')
     onResult?.(ok ? 'correct' : 'incorrect')
   }
 
-  const witnessText = (n: number) =>
-    n === 0 ? 'no witnesses' : `${n} witness${n === 1 ? '' : 'es'}`
-
   return (
     <section className="module">
       <div className="suspect-grid">
-        {state.suspects.map((s, i) => (
+        {state.suspects.map((s) => (
           <button
-            key={s.name}
+            key={s.code}
             type="button"
-            className={`suspect-card ${selected.has(i) ? 'is-selected' : ''}`}
-            onClick={() => toggle(i)}
+            className={`suspect-card ${selected === s.code ? 'is-selected' : ''}`}
+            onClick={() => pickSuspect(s.code)}
             disabled={result === 'correct'}
           >
-            <div className="suspect-card__name">{s.name}</div>
-            <ul className="suspect-card__attrs">
-              <li>{s.occupation}</li>
-              <li>at the {s.alibiLocation}</li>
-              <li>had {s.item}</li>
-              <li>{witnessText(s.witnessCount)}</li>
-            </ul>
+            <Silhouette />
+            <Item id={s.item} />
+            <div className="suspect-card__name">{s.code}</div>
+            <div className="suspect-card__alibi">
+              <span>“I was at the {s.claim.location}</span>
+              <span>at {s.claim.time}.”</span>
+            </div>
           </button>
         ))}
       </div>
@@ -55,13 +50,17 @@ export function SolverView({ seed, onResult }: SolverViewProps) {
           type="button"
           className="submit-btn"
           onClick={submit}
-          disabled={selected.size === 0 || result === 'correct'}
+          disabled={!selected || result === 'correct'}
         >
-          Submit ({selected.size}/3)
+          Accuse
         </button>
-        {result === 'correct' && <span className="result result--ok">✓ Correct</span>}
+        {result === 'correct' && (
+          <span className="result result--ok">✓ Caught the liar</span>
+        )}
         {result === 'incorrect' && (
-          <span className="result result--bad">✗ Not quite — try again</span>
+          <span className="result result--bad">
+            ✗ Their story checks out — try another
+          </span>
         )}
       </div>
     </section>

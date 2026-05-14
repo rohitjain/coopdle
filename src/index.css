@@ -246,19 +246,31 @@ a {
 
 /* ===== Crime Board module ===== */
 
+/* Same 3-top / 2-centered-bottom layout as the glyph grid. */
 .suspect-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px;
 }
 
+.suspect-grid > :nth-child(1) { grid-column: 1 / span 2; }
+.suspect-grid > :nth-child(2) { grid-column: 3 / span 2; }
+.suspect-grid > :nth-child(3) { grid-column: 5 / span 2; }
+.suspect-grid > :nth-child(4) { grid-column: 2 / span 2; }
+.suspect-grid > :nth-child(5) { grid-column: 4 / span 2; }
+
+
 .suspect-card {
   appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
-  padding: 12px;
-  text-align: left;
+  padding: 12px 10px;
+  text-align: center;
   color: var(--text);
   font: inherit;
   cursor: pointer;
@@ -278,20 +290,47 @@ a {
   }
 }
 
-.suspect-card__name {
-  font-family: var(--mono);
-  font-size: 1rem;
-  color: var(--text-h);
-  margin-bottom: 6px;
+
+.suspect-silhouette {
+  width: 38px;
+  height: 38px;
+  fill: var(--text-dim);
+  opacity: 0.8;
 }
 
-.suspect-card__attrs {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.suspect-card .item-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--text-h);
+}
+
+.item-icon--inline {
+  display: inline-block;
+  vertical-align: -6px;
+  width: 22px;
+  height: 22px;
+  margin: 0 3px;
+  color: var(--text-h);
+}
+
+.manual__witnesses li {
+  line-height: 1.9;
+}
+
+.suspect-card__name {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.suspect-card__alibi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-size: 0.85rem;
   color: var(--text-dim);
   line-height: 1.4;
+  font-style: italic;
 }
 
 /* ===== Chess module ===== */
@@ -785,49 +824,35 @@ a {
   transform: translateX(-50%);
 }
 
-/* Crime Board preview: 3 stacked mini suspect cards */
+/* Crime Board preview: 5 silhouettes in 3-top / 2-centered layout,
+   mirroring the Solver's suspect grid. */
 .module-preview--crime {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
   gap: 4px;
   padding: 4px;
 }
 
-.crime-preview-card {
-  flex: 1 1 0;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--panel-border);
+.module-preview--crime > :nth-child(1) { grid-column: 1 / span 2; }
+.module-preview--crime > :nth-child(2) { grid-column: 3 / span 2; }
+.module-preview--crime > :nth-child(3) { grid-column: 5 / span 2; }
+.module-preview--crime > :nth-child(4) { grid-column: 2 / span 2; }
+.module-preview--crime > :nth-child(5) { grid-column: 4 / span 2; }
+
+.crime-preview-cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 3px;
-  padding: 4px 6px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 3px;
+  padding: 4px;
 }
 
-.crime-preview-card__name {
-  display: block;
-  height: 3px;
-  width: 50%;
-  background: var(--text-h);
-  border-radius: 1px;
-}
-
-.crime-preview-card__line {
-  display: block;
-  height: 2px;
-  width: 80%;
-  background: var(--text-dim);
-  border-radius: 1px;
-  opacity: 0.7;
-}
-
-.crime-preview-card__line:nth-child(3) {
-  width: 65%;
-}
-
-.crime-preview-card__line:nth-child(4) {
-  width: 72%;
+.crime-preview-cell .suspect-silhouette {
+  width: 75%;
+  height: 75%;
 }
 
 /* ===== Progress strip (Solver) ===== */
@@ -873,6 +898,65 @@ a {
   color: var(--bg);
 }
 
+.progress-dot.is-failed {
+  background: #f37070;
+  border-color: #f37070;
+  color: var(--bg);
+}
+
+/* ===== Strike indicator (between progress strip and module) ===== */
+
+.strike-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  min-height: 24px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.strike-row__label {
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.strike-row--solved {
+  color: var(--solver);
+}
+
+.strike-row--failed {
+  color: #f37070;
+}
+
+.strike-pips {
+  display: flex;
+  gap: 6px;
+}
+
+.strike-pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--text-dim);
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.strike-pip.is-used {
+  background: #f37070;
+  border-color: #f37070;
+}
+
+/* Failed module is visible but non-interactive. */
+.module-slot.is-failed {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
 /* ===== Flip-to-solver button (Instructor) ===== */
 
 .flip-btn {
@@ -896,44 +980,97 @@ a {
 
 /* ===== Success screen (Solver finish) ===== */
 
-.success-screen {
+/* ===== Results screen (after all modules complete) ===== */
+
+.results-screen {
   text-align: center;
-  padding: 32px 0;
+  padding: 24px 0;
 }
 
-.success-screen__title {
+.results-screen__title {
   font-family: var(--mono);
   font-size: 1.5rem;
-  margin-bottom: 24px;
-  color: var(--solver);
+  margin-bottom: 20px;
+  color: var(--text-h);
 }
 
-.success-screen__stats {
+.results-summary {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  margin-bottom: 32px;
+  gap: 36px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
-.success-stat {
+.results-stat {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.success-stat__value {
+.results-stat__value {
   font-family: var(--mono);
-  font-size: 2.25rem;
+  font-size: 1.85rem;
   color: var(--text-h);
   line-height: 1;
 }
 
-.success-stat__label {
+.results-stat__label {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.results-modules {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 28px;
+  max-width: 520px;
+}
+
+.results-module {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.results-module__name {
+  font-family: var(--mono);
+  color: var(--text-h);
+}
+
+.results-module__time,
+.results-module__strikes {
+  font-family: var(--mono);
   color: var(--text-dim);
   font-size: 0.85rem;
 }
 
-.success-screen__next {
+.results-module__status {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.results-module.is-passed .results-module__status {
+  color: var(--solver);
+}
+
+.results-module.is-failed .results-module__status {
+  color: #f37070;
+}
+
+.results-module.is-failed {
+  border-color: rgba(243, 112, 112, 0.3);
+}
+
+.results-screen__next {
   max-width: 480px;
   margin: 0 auto;
   display: flex;

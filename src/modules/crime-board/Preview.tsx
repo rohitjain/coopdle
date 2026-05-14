@@ -1,15 +1,13 @@
-// Mini suspect cards — three stacked cards each with a header bar
-// and attribute lines. Visually reads as "list of named people with
-// attributes" without saying so.
+import { Silhouette } from './Silhouette'
+
+// Mirrors the Solver's 3-top / 2-bottom suspect layout so the Instructor can
+// pick this tile by visual match.
 export function Preview() {
   return (
     <div className="module-preview module-preview--crime">
-      {[0, 1, 2].map((i) => (
-        <div key={i} className="crime-preview-card">
-          <span className="crime-preview-card__name" />
-          <span className="crime-preview-card__line" />
-          <span className="crime-preview-card__line" />
-          <span className="crime-preview-card__line" />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div key={i} className="crime-preview-cell">
+          <Silhouette />
         </div>
       ))}
     </div>

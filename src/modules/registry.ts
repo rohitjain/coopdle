@@ -1,8 +1,5 @@
 import { todayUtcSeed } from '../lib/dateSeed'
 import { chessModule } from './chess'
-// crime-board is intentionally not in the daily rotation right now; the
-// import is kept so the module isn't tree-shaken and stays easy to bring
-// back later.
 import { crimeBoardModule } from './crime-board'
 import { glyphMatchModule } from './glyph-match'
 import { waveMatchModule } from './wave-match'
@@ -41,6 +38,7 @@ export function getDailySlots(gameId: string, baseSeed?: number): DailySlot[] {
   return [
     slot(glyphMatchModule),
     slot(chessModule),
+    slot(crimeBoardModule),
     slot(waveMatchModule),
   ]
 }

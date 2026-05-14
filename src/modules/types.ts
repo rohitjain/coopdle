@@ -12,6 +12,9 @@ export interface SolverViewProps {
 export interface PuzzleModule {
   id: string
   name: string
+  // Number of wrong submissions before the module is marked failed.
+  // Defaults to 3 if omitted.
+  maxStrikes?: number
   // Small static visual identifier shown in the Instructor manual grid.
   // Should not depend on the day's seed.
   Preview?: FC

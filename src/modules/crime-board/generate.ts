@@ -1,83 +1,118 @@
-import { makeRng, pick, randInt } from '../../lib/rng'
-import { ITEMS, LOCATIONS, NAMES, OCCUPATIONS } from './data'
+import { makeRng, pick, shuffle } from '../../lib/rng'
+import { ITEMS, LOCATIONS, NAMES, TIMES, type ItemId } from './data'
 
 export interface Suspect {
-  name: string
-  occupation: string
-  alibiLocation: string
-  item: string
-  witnessCount: number
+  code: string
+  item: ItemId
+  claim: { time: string; location: string }
 }
 
-export type Attr = 'occupation' | 'alibiLocation' | 'item' | 'witnessCount'
-
-export interface Predicate {
-  attr: Attr
-  value: string | number
-  label: string
+// What the instructor sees: "The person with the [item] was at [location] at [time]."
+export interface Witness {
+  item: ItemId
+  time: string
+  location: string
 }
+
+export type Variant = 'wrong-location' | 'wrong-time' | 'wrong-both'
 
 export interface CrimeBoardState {
   suspects: Suspect[]
-  predicates: [Predicate, Predicate]
-  correctIds: number[]
+  witnesses: Witness[]
+  liarCode: string
+  variant: Variant
 }
 
-const ATTRS: readonly Attr[] = ['occupation', 'alibiLocation', 'item', 'witnessCount']
+const slotKey = (t: string, l: string) => `${t}|${l}`
 
-function makeSuspect(rng: () => number, name: string): Suspect {
-  return {
-    name,
-    occupation: pick(rng, OCCUPATIONS),
-    alibiLocation: pick(rng, LOCATIONS),
-    item: pick(rng, ITEMS),
-    witnessCount: randInt(rng, 0, 3),
+function pickSlot(rng: () => number, used: Set<string>) {
+  for (let i = 0; i < 200; i++) {
+    const time = pick(rng, TIMES)
+    const location = pick(rng, LOCATIONS)
+    if (!used.has(slotKey(time, location))) return { time, location }
   }
+  throw new Error('Ran out of distinct slots')
 }
 
-function predicateLabel(attr: Attr, value: string | number): string {
-  switch (attr) {
-    case 'occupation':
-      return `is a ${value}`
-    case 'alibiLocation':
-      return `was at the ${value}`
-    case 'item':
-      return `had ${value}`
-    case 'witnessCount':
-      if (value === 0) return 'had no witnesses'
-      if (value === 1) return 'had exactly 1 witness'
-      return `had exactly ${value} witnesses`
+function differentLocation(rng: () => number, not: string): string {
+  for (let i = 0; i < 50; i++) {
+    const l = pick(rng, LOCATIONS)
+    if (l !== not) return l
   }
+  return LOCATIONS[0] === not ? LOCATIONS[1] : LOCATIONS[0]
 }
 
-function makePredicate(rng: () => number, suspects: Suspect[], avoidAttr?: Attr): Predicate {
-  const attrChoices = avoidAttr ? ATTRS.filter((a) => a !== avoidAttr) : ATTRS
-  const attr = pick(rng, attrChoices)
-  const values = suspects.map((s) => s[attr])
-  const unique = [...new Set(values)]
-  const value = pick(rng, unique)
-  return { attr, value, label: predicateLabel(attr, value) }
-}
-
-function matches(suspect: Suspect, p: Predicate): boolean {
-  return suspect[p.attr] === p.value
+function differentTime(rng: () => number, not: string): string {
+  for (let i = 0; i < 50; i++) {
+    const t = pick(rng, TIMES)
+    if (t !== not) return t
+  }
+  return TIMES[0] === not ? TIMES[1] : TIMES[0]
 }
 
 export function generateCrimeBoard(seed: number): CrimeBoardState {
-  for (let attempt = 0; attempt < 200; attempt++) {
-    const rng = makeRng(seed + attempt * 7919)
-    const suspects = NAMES.map((name) => makeSuspect(rng, name))
+  const rng = makeRng(seed)
+  const variant = pick(rng, [
+    'wrong-location',
+    'wrong-time',
+    'wrong-both',
+  ] as const)
 
-    const predA = makePredicate(rng, suspects)
-    const predB = makePredicate(rng, suspects, predA.attr)
+  // Five distinct items, one per suspect.
+  const chosenItems = shuffle(rng, ITEMS).slice(0, 5)
+  // Five distinct true slots — these are the verified locations/times.
+  const used = new Set<string>()
+  const trueSlots = chosenItems.map(() => {
+    const s = pickSlot(rng, used)
+    used.add(slotKey(s.time, s.location))
+    return s
+  })
 
-    const correctIds = suspects
-      .map((s, i) => (matches(s, predA) || matches(s, predB) ? i : -1))
-      .filter((i) => i >= 0)
+  // Random suspect codes, random liar.
+  const codes = shuffle(rng, NAMES)
+  const liarIdx = Math.floor(rng() * 5)
+  const liarCode = codes[liarIdx]
 
-    if (correctIds.length >= 1 && correctIds.length <= 3) {
-      return { suspects, predicates: [predA, predB], correctIds }
+  const suspects: Suspect[] = chosenItems.map((item, i) => {
+    if (i === liarIdx) {
+      const trueSlot = trueSlots[i]
+      let claim: { time: string; location: string }
+      switch (variant) {
+        case 'wrong-location':
+          claim = {
+            time: trueSlot.time,
+            location: differentLocation(rng, trueSlot.location),
+          }
+          break
+        case 'wrong-time':
+          claim = {
+            time: differentTime(rng, trueSlot.time),
+            location: trueSlot.location,
+          }
+          break
+        case 'wrong-both':
+          claim = {
+            time: differentTime(rng, trueSlot.time),
+            location: differentLocation(rng, trueSlot.location),
+          }
+          break
+      }
+      return { code: codes[i], item, claim }
     }
+    return { code: codes[i], item, claim: trueSlots[i] }
+  })
+
+  const witnesses: Witness[] = chosenItems.map((item, i) => ({
+    item,
+    time: trueSlots[i].time,
+    location: trueSlots[i].location,
+  }))
+
+  // Shuffle both display orderings so position doesn't betray the pairing.
+  return {
+    suspects: shuffle(rng, suspects),
+    witnesses: shuffle(rng, witnesses),
+    liarCode,
+    variant,
   }
-  throw new Error('Could not generate a valid crime board')
 }
