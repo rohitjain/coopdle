@@ -1,0 +1,966 @@
+:root {
+  --bg: #0f1115;
+  --panel: #181b22;
+  --panel-border: #262a33;
+  --text: #d6d8dd;
+  --text-dim: #8b8f99;
+  --text-h: #f3f4f6;
+  --solver: #7ee8a3;
+  --solver-bg: rgba(126, 232, 163, 0.12);
+  --instructor: #f6c66b;
+  --instructor-bg: rgba(246, 198, 107, 0.12);
+
+  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  font: 16px/1.5 var(--sans);
+  color-scheme: dark;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+}
+
+#root {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+h1, h2, h3 {
+  color: var(--text-h);
+  font-weight: 600;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ===== Landing ===== */
+
+.landing {
+  text-align: center;
+  padding-top: 8vh;
+}
+
+.title {
+  font-family: var(--mono);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.title__suffix {
+  color: var(--solver);
+}
+
+.tagline {
+  color: var(--text-dim);
+  margin-bottom: 48px;
+}
+
+.role-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.role-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  text-align: left;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.role-choice--solver:hover {
+  border-color: var(--solver);
+}
+
+.role-choice--instructor:hover {
+  border-color: var(--instructor);
+}
+
+.role-choice__label {
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  color: var(--text-h);
+}
+
+.role-choice--solver .role-choice__label {
+  color: var(--solver);
+}
+
+.role-choice--instructor .role-choice__label {
+  color: var(--instructor);
+}
+
+.role-choice__desc {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.footnote {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+/* ===== Role views ===== */
+
+.role-view__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.daily-label {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--text-h);
+  margin-left: auto;
+}
+
+.solver-timer {
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: var(--solver);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.back-link {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+
+  &:hover {
+    color: var(--text-h);
+  }
+}
+
+.role-tag {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.role-tag--solver {
+  color: var(--solver);
+  background: var(--solver-bg);
+}
+
+.role-tag--instructor {
+  color: var(--instructor);
+  background: var(--instructor-bg);
+}
+
+.placeholder {
+  color: var(--text-dim);
+  margin: 12px 0 32px;
+}
+
+.module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.module {
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+}
+
+.module__side-only {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  display: block;
+}
+
+.module__actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.submit-btn {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--text-h);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--text-dim);
+  border-radius: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.result {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+}
+
+.result--ok {
+  color: var(--solver);
+}
+
+.result--bad {
+  color: #f37070;
+}
+
+/* ===== Crime Board module ===== */
+
+.suspect-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.suspect-card {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--text-dim);
+  }
+
+  &.is-selected {
+    background: rgba(126, 232, 163, 0.08);
+    border-color: var(--solver);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.suspect-card__name {
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: var(--text-h);
+  margin-bottom: 6px;
+}
+
+.suspect-card__attrs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* ===== Chess module ===== */
+
+.chess-board {
+  max-width: 480px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  user-select: none;
+}
+
+.chess-sq {
+  position: relative;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  line-height: 1;
+}
+
+.chess-sq--light {
+  background: #d6d8dc;
+}
+
+.chess-sq--dark {
+  background: #5b6175;
+}
+
+.chess-sq.is-selected {
+  box-shadow: inset 0 0 0 3px var(--solver);
+}
+
+.chess-sq.is-movable::after {
+  content: '';
+  position: absolute;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: rgba(126, 232, 163, 0.55);
+  pointer-events: none;
+}
+
+.chess-piece {
+  font-variant-emoji: text;
+}
+
+.chess-piece--white {
+  color: #fafafa;
+  text-shadow:
+    -1px -1px 0 #15171c,
+    1px -1px 0 #15171c,
+    -1px 1px 0 #15171c,
+    1px 1px 0 #15171c;
+}
+
+.chess-piece--black {
+  color: #15171c;
+}
+
+/* ===== Glyph Match module ===== */
+
+/* 3 across on top, 2 centered below. */
+.glyph-solver-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.glyph-solver-grid > :nth-child(1) { grid-column: 1 / span 2; }
+.glyph-solver-grid > :nth-child(2) { grid-column: 3 / span 2; }
+.glyph-solver-grid > :nth-child(3) { grid-column: 5 / span 2; }
+.glyph-solver-grid > :nth-child(4) { grid-column: 2 / span 2; }
+.glyph-solver-grid > :nth-child(5) { grid-column: 4 / span 2; }
+
+.glyph-master-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin: 12px 0;
+
+  @media (max-width: 380px) {
+    gap: 4px;
+  }
+}
+
+.glyph-tile--master .glyph-svg {
+  max-width: 72px;
+  max-height: 72px;
+}
+
+.glyph-tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  color: var(--text-h);
+  padding: 8px;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+  aspect-ratio: 1;
+}
+
+.glyph-tile--solver {
+  appearance: none;
+
+  &:hover:not(:disabled) {
+    border-color: var(--text-dim);
+  }
+
+  &.is-numbered {
+    background: rgba(126, 232, 163, 0.1);
+    border-color: var(--solver);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.glyph-tile--master {
+  padding: 4px;
+  cursor: default;
+}
+
+.glyph-tile__badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--solver);
+  background: var(--bg);
+  border: 1px solid var(--solver);
+  border-radius: 999px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+}
+
+.glyph-tile__index {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
+.glyph-svg {
+  display: block;
+}
+
+/* ===== Manual styles ===== */
+
+.manual__rule {
+  color: var(--text) !important;
+  margin: 8px 0 !important;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.manual__criteria {
+  margin: 8px 0;
+  padding-left: 22px;
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 0.95rem;
+
+  li {
+    margin: 4px 0;
+  }
+}
+
+.manual__note {
+  color: var(--text-dim) !important;
+  font-size: 0.85rem !important;
+  margin-top: 12px !important;
+  font-style: italic;
+}
+
+.manual-step {
+  margin-top: 16px;
+}
+
+.manual-step__heading {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--text-h);
+  margin: 0 0 6px;
+}
+
+.manual-step__intro {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.manual-step__list {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.manual-step__list li {
+  margin: 2px 0;
+}
+
+.manual-step__line {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.manual-step__hint {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* ===== Wave Match module ===== */
+
+.wave-graph {
+  width: 100%;
+  height: 140px;
+  display: block;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.wave-graph__axis {
+  stroke: var(--instructor);
+  stroke-width: 1.5;
+}
+
+.wave-graph__guide {
+  stroke: var(--instructor);
+  stroke-width: 1;
+  opacity: 0.4;
+}
+
+.wave-graph__edge {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+  opacity: 0.6;
+}
+
+.wave-graph__wave {
+  fill: none;
+  stroke: var(--solver);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.wave-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wave-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wave-slider__input {
+  width: 100%;
+  accent-color: var(--solver);
+  height: 24px;
+  cursor: pointer;
+}
+
+.wave-slider__ticks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.wave-slider__tick {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--panel-border);
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.wave-slider__tick.is-active {
+  background: var(--solver);
+  transform: scale(1.25);
+}
+
+/* ===== Manual: module grid + drill-down ===== */
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.module-tile {
+  appearance: none;
+  aspect-ratio: 1;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  display: grid;
+  place-items: stretch;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+
+  &:hover {
+    border-color: var(--text-dim);
+    transform: translateY(-1px);
+  }
+}
+
+.manual-active {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 14px 18px 18px;
+}
+
+.manual-back {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--text-h);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--text-dim);
+  }
+}
+
+.manual-active__body {
+  /* InstructorView returns a fragment of content (rule, criteria, note). */
+}
+
+/* ===== Module previews — each looks like a miniature of the puzzle ===== */
+
+.module-preview {
+  width: 100%;
+  height: 100%;
+}
+
+/* Glyph Match preview: 3 top / 2 centered below — mirrors the Solver grid.
+   Cells are squared via aspect-ratio; the grid is centered inside the tile. */
+.module-preview--glyphs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 3px;
+}
+
+.module-preview--glyphs > :nth-child(1) { grid-column: 1 / span 2; }
+.module-preview--glyphs > :nth-child(2) { grid-column: 3 / span 2; }
+.module-preview--glyphs > :nth-child(3) { grid-column: 5 / span 2; }
+.module-preview--glyphs > :nth-child(4) { grid-column: 2 / span 2; }
+.module-preview--glyphs > :nth-child(5) { grid-column: 4 / span 2; }
+
+.glyph-preview-cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+  padding: 2px;
+  color: var(--text-h);
+}
+
+.glyph-preview-cell .glyph-svg {
+  width: 80%;
+  height: 80%;
+  max-width: none;
+  max-height: none;
+}
+
+/* Chess preview: 4x4 mini board with two pieces */
+.module-preview--chess {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chess-preview-sq {
+  background: #d6d8dc;
+  display: grid;
+  place-items: center;
+  color: #15171c;
+  font-size: clamp(0.6rem, 2.6vw, 1rem);
+  line-height: 1;
+}
+
+.chess-preview-sq.is-dark {
+  background: #5b6175;
+}
+
+.chess-preview-sq span {
+  font-variant-emoji: text;
+}
+
+/* Wave Match preview: mini wave + 3 slider rails */
+.module-preview--wave {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.wave-preview__wave {
+  width: 100%;
+  height: 36%;
+  display: block;
+}
+
+.wave-preview__axis {
+  stroke: var(--panel-border);
+  stroke-width: 1;
+}
+
+.wave-preview__line {
+  stroke: var(--text-h);
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.wave-preview__sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wave-preview__slider {
+  position: relative;
+  height: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.wave-preview__track {
+  position: absolute;
+  inset: 50% 0 auto 0;
+  height: 2px;
+  background: var(--panel-border);
+  transform: translateY(-1px);
+}
+
+.wave-preview__thumb {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--text-h);
+  transform: translateX(-50%);
+}
+
+/* Crime Board preview: 3 stacked mini suspect cards */
+.module-preview--crime {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+}
+
+.crime-preview-card {
+  flex: 1 1 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--panel-border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.crime-preview-card__name {
+  display: block;
+  height: 3px;
+  width: 50%;
+  background: var(--text-h);
+  border-radius: 1px;
+}
+
+.crime-preview-card__line {
+  display: block;
+  height: 2px;
+  width: 80%;
+  background: var(--text-dim);
+  border-radius: 1px;
+  opacity: 0.7;
+}
+
+.crime-preview-card__line:nth-child(3) {
+  width: 65%;
+}
+
+.crime-preview-card__line:nth-child(4) {
+  width: 72%;
+}
+
+/* ===== Progress strip (Solver) ===== */
+
+.progress-strip {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 8px 0 24px;
+}
+
+.progress-dot {
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 999px;
+  border: 2px solid var(--panel-border);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.progress-dot.is-pending:hover {
+  border-color: var(--text-dim);
+  color: var(--text-h);
+}
+
+.progress-dot.is-current {
+  border-color: var(--solver);
+  background: var(--solver-bg);
+  color: var(--solver);
+}
+
+.progress-dot.is-done {
+  background: var(--solver);
+  border-color: var(--solver);
+  color: var(--bg);
+}
+
+/* ===== Flip-to-solver button (Instructor) ===== */
+
+.flip-btn {
+  appearance: none;
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: var(--solver-bg);
+  border: 1px solid var(--solver);
+  border-radius: 10px;
+  color: var(--solver);
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.12s ease;
+
+  &:hover {
+    background: rgba(126, 232, 163, 0.18);
+  }
+}
+
+/* ===== Success screen (Solver finish) ===== */
+
+.success-screen {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.success-screen__title {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+  color: var(--solver);
+}
+
+.success-screen__stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 32px;
+}
+
+.success-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.success-stat__value {
+  font-family: var(--mono);
+  font-size: 2.25rem;
+  color: var(--text-h);
+  line-height: 1;
+}
+
+.success-stat__label {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.success-screen__next {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  p {
+    color: var(--text);
+    line-height: 1.5;
+  }
+}
+
+.primary-btn {
+  display: inline-block;
+  appearance: none;
+  background: var(--solver);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 22px;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--bg);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+}
